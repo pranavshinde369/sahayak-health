@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 24% 5%;
+    --foreground: 210 20% 96%;
+
+    --card: 220 26% 11%;
+    --card-foreground: 210 20% 96%;
+
+    --popover: 220 26% 11%;
+    --popover-foreground: 210 20% 96%;
+
+    --primary: 162 100% 39%;
+    --primary-foreground: 240 24% 5%;
+
+    --secondary: 220 20% 16%;
+    --secondary-foreground: 210 20% 96%;
+
+    --muted: 220 20% 14%;
+    --muted-foreground: 215 16% 65%;
+
+    --accent: 262 83% 58%;
+    --accent-foreground: 210 20% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+
+    --success: 152 76% 40%;
+    --success-foreground: 210 20% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 240 24% 5%;
+
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 162 100% 39%;
+
+    --radius: 1rem;
+
+    --gradient-primary: linear-gradient(135deg, hsl(162 100% 39%), hsl(172 80% 45%));
+    --gradient-accent: linear-gradient(135deg, hsl(262 83% 58%), hsl(280 75% 60%));
+    --gradient-hero: linear-gradient(140deg, hsl(162 100% 39% / 0.18), hsl(262 83% 58% / 0.18));
+    --shadow-glow: 0 10px 40px -10px hsl(162 100% 39% / 0.4);
+    --shadow-card: 0 4px 24px -8px hsl(0 0% 0% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html, body, #root {
+    @apply bg-background text-foreground;
+    min-height: 100vh;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-primary { background: var(--gradient-primary); }
+  .bg-gradient-accent { background: var(--gradient-accent); }
+  .bg-gradient-hero { background: var(--gradient-hero); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+}
