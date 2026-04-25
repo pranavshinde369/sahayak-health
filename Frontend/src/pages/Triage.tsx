@@ -11,24 +11,40 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { runTriage } from "@/lib/api";
+import { toast } from "sonner";
+
+type RiskLevel = "HIGH" | "MEDIUM" | "LOW";
+
+interface TriageResponse {
+  assessment?: string;
+  risk_level?: RiskLevel | string;
+  red_flags?: string[];
+  recommendation?: string;
+  referral_needed?: boolean;
+}
 
 const Triage = () => {
   const navigate = useNavigate();
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [analysing, setAnalysing] = useState(false);
-  const [analysed, setAnalysed] = useState(false);
+  const [result, setResult] = useState<TriageResponse | null>(null);
 
   const hasText = transcript.trim().length > 0;
 
-  const handleAnalyse = () => {
+  const handleAnalyse = async () => {
     if (!hasText || analysing) return;
     setAnalysing(true);
-    setAnalysed(false);
-    setTimeout(() => {
+    setResult(null);
+    try {
+      const data = await runTriage(transcript, "mr");
+      setResult(data);
+    } catch (e) {
+      toast.error("Could not reach backend");
+    } finally {
       setAnalysing(false);
-      setAnalysed(true);
-    }, 1600);
+    }
   };
 
   return (
@@ -119,66 +135,93 @@ const Triage = () => {
         )}
       </button>
 
-      {analysed && (
-        <>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-            Assessment Result
-          </h2>
-      <Card className="border-destructive/30">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Assessment
-          </span>
-          <StatusBadge variant="red">HIGH</StatusBadge>
-        </div>
+      {result && (() => {
+        const risk = (result.risk_level || "").toString().toUpperCase() as RiskLevel;
+        const variant = risk === "HIGH" ? "red" : risk === "MEDIUM" ? "amber" : "green";
+        const borderClass =
+          risk === "HIGH"
+            ? "border-destructive/30"
+            : risk === "MEDIUM"
+            ? "border-warning/30"
+            : "border-success/30";
+        return (
+          <>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              Assessment Result
+            </h2>
+            <Card className={borderClass}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Assessment
+                </span>
+                {risk && <StatusBadge variant={variant}>{risk}</StatusBadge>}
+              </div>
 
-        <p className="text-sm text-foreground leading-relaxed mb-4">
-          Persistent fever with breathlessness — possible respiratory infection
-        </p>
+              {result.assessment && (
+                <p className="text-sm text-foreground leading-relaxed mb-4">
+                  {result.assessment}
+                </p>
+              )}
 
-        <div className="mb-4">
-          <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-            Red Flags
-          </p>
-          <ul className="space-y-1.5">
-            {[
-              "Fever > 3 days",
-              "Breathing difficulty reported",
-            ].map((flag) => (
-              <li
-                key={flag}
-                className="flex items-start gap-2 text-sm text-muted-foreground"
-              >
-                <AlertTriangle
-                  size={14}
-                  className="text-destructive mt-0.5 shrink-0"
-                />
-                <span>{flag}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+              {result.red_flags && result.red_flags.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
+                    Red Flags
+                  </p>
+                  <ul className="space-y-1.5">
+                    {result.red_flags.map((flag) => (
+                      <li
+                        key={flag}
+                        className="flex items-start gap-2 text-sm text-muted-foreground"
+                      >
+                        <AlertTriangle
+                          size={14}
+                          className="text-destructive mt-0.5 shrink-0"
+                        />
+                        <span>{flag}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-        <div className="mb-4">
-          <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-            Recommendation
-          </p>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Refer to PHC immediately. Do not wait.
-          </p>
-        </div>
+              {result.recommendation && (
+                <div className="mb-4">
+                  <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
+                    Recommendation
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {result.recommendation}
+                  </p>
+                </div>
+              )}
 
-        <div className="flex flex-col gap-2 pt-2">
-          <button className="w-full bg-gradient-primary text-primary-foreground font-semibold py-3 rounded-xl shadow-glow active:scale-[0.98] transition flex items-center justify-center gap-2">
-            <FileText size={16} /> Generate Referral Letter
-          </button>
-          <button className="w-full border border-border text-foreground font-semibold py-3 rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-2 hover:bg-card">
-            <Save size={16} /> Save to Patient
-          </button>
-        </div>
-      </Card>
-        </>
-      )}
+              <div className="flex flex-col gap-2 pt-2">
+                {result.referral_needed && (
+                  <button
+                    onClick={() => {
+                      const qs = new URLSearchParams({
+                        name: "Rambai Kale",
+                        age: "58",
+                        village: "Mohol",
+                        findings: result.assessment ?? "",
+                        recommendation: result.recommendation ?? "",
+                      }).toString();
+                      navigate(`/referral?${qs}`);
+                    }}
+                    className="w-full bg-gradient-primary text-primary-foreground font-semibold py-3 rounded-xl shadow-glow active:scale-[0.98] transition flex items-center justify-center gap-2"
+                  >
+                    <FileText size={16} /> Generate Referral Letter
+                  </button>
+                )}
+                <button className="w-full border border-border text-foreground font-semibold py-3 rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-2 hover:bg-card">
+                  <Save size={16} /> Save to Patient
+                </button>
+              </div>
+            </Card>
+          </>
+        );
+      })()}
     </AppShell>
   );
 };
