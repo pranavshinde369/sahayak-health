@@ -1,15 +1,14 @@
 import os
 import json
 import base64
-import google.generativeai as genai
 from dotenv import load_dotenv
+import google.generativeai as genai
 
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-model = genai.GenerativeModel("gemini-1.5-flash")
-vision_model = genai.GenerativeModel("gemini-1.5-flash")
-
+model = genai.GenerativeModel("gemini-2.5-flash")
+vision_model = genai.GenerativeModel("gemini-2.5-flash")
 # ─── Helper ───────────────────────────────────────────────────────────────────
 
 def parse_json(text: str) -> dict:
