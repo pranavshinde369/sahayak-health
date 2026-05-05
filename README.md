@@ -15,7 +15,6 @@
   <img src="https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white" alt="FastAPI" />
   <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black" alt="React" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />
-  <img src="https://img.shields.io/badge/Hackathon-Kaggle_×_Google_DeepMind-orange" alt="Hackathon" />
 </p>
 
 ---
@@ -34,7 +33,6 @@
 - [API Reference](#-api-reference)
 - [Knowledge Base (RAG)](#-knowledge-base-rag)
 - [Why Gemma 4?](#-why-gemma-4)
-- [Hackathon Submission](#-hackathon-submission)
 - [Roadmap](#-roadmap)
 - [Team](#-team)
 - [License](#-license)
@@ -101,14 +99,15 @@ It runs **100% offline** using **Google's Gemma 4 (gemma3:4b)** via Ollama — n
 
 ---
 
-### 3. 📞 Nadi (IVR Triage)
-> *Toll-free IVR call → Marathi voice questions → works on any keypad phone*
+### 3. 📞 Nadi (Voice Agent & IVR Triage)
+> *Real-time voice agent & Toll-free IVR → Natural Marathi voice interactions → works on any keypad phone*
 
+- **Real-time Voice Agent** powered by **ElevenLabs** for natural, human-like conversational triage
 - Designed for patients with **no smartphone** — works on basic keypad phones
-- 7-question health assessment in **Marathi IVR (Interactive Voice Response)**
+- AI-driven dynamic health assessment in **Marathi Voice**
 - Collects: age group, symptoms, duration, fever, breathing, pregnancy, chronic conditions
-- AI processes transcript and generates risk assessment
-- Integrates with **Twilio** for telephony
+- Real-time transcription, status tracking, and audio visualizer for ASHA workers
+- Integrates with **ElevenLabs** for voice AI and **Twilio** for telephony
 
 <!-- SCREENSHOT: Nadi IVR page -->
 <p align="center">
@@ -244,7 +243,8 @@ The score factors in: red flags, emergency events, referral frequency, improving
               │
               ▼
     ┌──────────────────┐
-    │   Twilio IVR     │
+    │   Twilio IVR &   │
+    │   ElevenLabs AI  │
     │   (Nadi Module)  │
     │   Marathi Voice  │
     └──────────────────┘
@@ -266,6 +266,7 @@ The score factors in: red flags, emergency events, referral frequency, improving
 | **Animations** | Framer Motion | Page transitions and micro-interactions |
 | **Charts** | Recharts | Dashboard data visualization |
 | **PDF Generation** | fpdf2 | Bilingual referral letter PDFs |
+| **Voice AI Agent** | ElevenLabs | Real-time human-like Marathi voice conversations for Nadi |
 | **IVR/Telephony** | Twilio | Nadi module for keypad phone users |
 
 ---
@@ -407,6 +408,7 @@ curl -X POST http://localhost:8000/api/triage \
 | `POST` | `/api/patients` | Register new patient |
 | `GET` | `/api/patients` | List all patients |
 | `GET` | `/api/patients/{patient_id}` | Get patient details + history |
+| `GET` | `/api/elevenlabs/token` | Get signed URL for ElevenLabs voice session |
 | `POST` | `/api/nadi/webhook` | Twilio IVR webhook for Nadi |
 | `POST` | `/api/nadi/process` | Process Nadi IVR transcript |
 | `GET` | `/api/nadi/calls` | List all Nadi IVR calls |
@@ -488,34 +490,11 @@ Sahayak uses a lightweight **Retrieval-Augmented Generation** system to ground G
 
 ---
 
-## 🏆 Hackathon Submission
-
-**Kaggle × Google DeepMind — Gemma 4 Good Hackathon**
-
-### Track: Health & Sciences
-
-### Why Sahayak Matters
-
-- 🎯 **Real Impact** — Directly serves 1M+ ASHA workers across India
-- 🌐 **Offline-First** — Gemma 4 runs locally, no cloud dependency
-- 🗣️ **Marathi-Native** — Responds in the language ASHA workers speak
-- 📞 **Inclusive** — Nadi IVR works on any ₹500 keypad phone
-- 🔒 **Privacy** — Patient data never leaves the device
-- 📊 **Evidence-Based** — RAG grounded in official ASHA protocols
-- 🧠 **Holistic** — Also monitors ASHA worker burnout
-
-### Demo Video
-
-<!-- ADD YOUR DEMO VIDEO LINK HERE -->
-> 🎥 **[Watch the Demo Video](YOUR_VIDEO_LINK_HERE)**
-
----
-
 ## 🗺️ Roadmap
 
 - [x] Voice Triage (Marathi/Hindi/English)
 - [x] Pratibimb Face Scan (Anemia, Jaundice, Dehydration)
-- [x] Nadi IVR (Keypad phone triage)
+- [x] Nadi Voice Agent & IVR (ElevenLabs + Twilio)
 - [x] Jeevan Score (0-100 health trajectory)
 - [x] Auto Marathi PDF Referral Letters
 - [x] ASHA Burnout Detection
