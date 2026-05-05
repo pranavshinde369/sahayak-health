@@ -1,5 +1,8 @@
 import { AppShell, Card, StatusBadge } from "@/components/AppShell";
 import { Phone, PhoneIncoming, UserPlus, UserCheck } from "lucide-react";
+import { useState } from 'react';
+import { useNadiCall } from '../hooks/useNadiCall';
+import NadiCallOverlay from '../components/NadiCallOverlay';
 
 type Risk = "HIGH" | "MEDIUM" | "LOW";
 
@@ -40,6 +43,12 @@ const riskVariant: Record<Risk, "red" | "amber" | "green"> = {
 };
 
 const Nadi = () => {
+  const {
+    callStatus, agentMessage, isSpeaking,
+    callDuration, formatDuration, startCall, endCall
+  } = useNadiCall();
+  const [activeCallData, setActiveCallData] = useState(null);
+
   return (
     <AppShell>
       {/* Header */}
@@ -100,7 +109,13 @@ const Nadi = () => {
 
             {/* Actions */}
             <div className="grid grid-cols-2 gap-2 mt-4">
-              <button className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-card text-foreground text-xs font-semibold active:scale-[0.98] transition-transform">
+              <button 
+                onClick={() => {
+                  setActiveCallData(c);
+                  startCall(c);
+                }}
+                className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-card text-foreground text-xs font-semibold active:scale-[0.98] transition-transform"
+              >
                 <UserCheck size={14} />
                 Assign to Patient
               </button>
@@ -112,6 +127,16 @@ const Nadi = () => {
           </Card>
         ))}
       </div>
+      
+      <NadiCallOverlay
+        callData={activeCallData}
+        callStatus={callStatus}
+        agentMessage={agentMessage}
+        callDuration={callDuration}
+        isSpeaking={isSpeaking}
+        formatDuration={formatDuration}
+        onEndCall={endCall}
+      />
     </AppShell>
   );
 };
