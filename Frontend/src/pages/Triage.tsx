@@ -9,10 +9,12 @@ import {
   Sparkles,
   Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { runTriage } from "@/lib/api";
 import { toast } from "sonner";
+import { useSpeechInput } from '../hooks/useSpeechInput';
+import MicButton from '../components/MicButton';
 
 type RiskLevel = "HIGH" | "MEDIUM" | "LOW";
 
@@ -30,6 +32,14 @@ const Triage = () => {
   const [transcript, setTranscript] = useState("");
   const [analysing, setAnalysing] = useState(false);
   const [result, setResult] = useState<TriageResponse | null>(null);
+
+  const handleVoiceResult = useCallback((text: string) => {
+    setTranscript(text);
+  }, []);
+
+  const { isListening, error, toggleListening } = useSpeechInput(
+    handleVoiceResult
+  );
 
   const hasText = transcript.trim().length > 0;
 
@@ -103,12 +113,61 @@ const Triage = () => {
 
       {/* Transcript */}
       <Card className="mt-2 mb-3 min-h-[110px] flex flex-col">
-        <textarea
-          value={transcript}
-          onChange={(e) => setTranscript(e.target.value.slice(0, 500))}
-          placeholder="Your speech will appear here..."
-          className="bg-transparent resize-none outline-none text-sm leading-relaxed flex-1 min-h-[80px] placeholder:text-muted-foreground placeholder:italic text-foreground"
-        />
+        <div style={{
+          display: 'flex',
+          gap: 10,
+          alignItems: 'center'
+        }}>
+          <textarea
+            value={transcript}
+            onChange={(e) => setTranscript(e.target.value.slice(0, 500))}
+            placeholder="Type or speak symptoms in Marathi..."
+            className="bg-transparent resize-none outline-none text-sm leading-relaxed flex-1 min-h-[80px] placeholder:text-muted-foreground placeholder:italic text-foreground"
+            style={{ flex: 1 }}
+          />
+          <MicButton
+            isListening={isListening}
+            onClick={toggleListening}
+            disabled={false}
+          />
+        </div>
+
+        {isListening && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            marginTop: 8,
+            color: '#4ade80',
+            fontSize: 13
+          }}>
+            <div style={{
+              width: 8, height: 8,
+              borderRadius: '50%',
+              backgroundColor: '#ef4444',
+              animation: 'micPulse 1s infinite'
+            }}/>
+            Listening... speak in Marathi or Hindi
+          </div>
+        )}
+
+        {error && (
+          <div style={{
+            marginTop: 8,
+            color: '#f87171',
+            fontSize: 13
+          }}>
+            ⚠️ {error}
+          </div>
+        )}
+
+        <div style={{
+          fontSize: 11,
+          color: '#6b7280',
+          marginTop: 6
+        }}>
+          🎤 मराठी, हिंदी किंवा English मध्ये बोला
+        </div>
         <p className="text-[10px] text-muted-foreground text-right mt-2 font-mono">
           {transcript.length} / 500
         </p>

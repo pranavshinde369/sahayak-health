@@ -1,6 +1,6 @@
 import { AppShell, Card, StatusBadge } from "@/components/AppShell";
 import { Camera, Upload, Eye, Droplet, FileText, Loader2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { runPratibimb } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -59,9 +59,71 @@ const disclaimerStyles = (risk?: OverallRisk) => {
 const Pratibimb = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PratibimbResponse | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraOpen(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
+  const startCamera = async () => {
+    setPreviewUrl(null);
+    setResult(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" }
+      });
+      setIsCameraOpen(true);
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      }, 50);
+    } catch (err) {
+      toast.error("Could not access camera");
+    }
+  };
+
+  const capturePhoto = async () => {
+    if (videoRef.current) {
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth || 480;
+      canvas.height = videoRef.current.videoHeight || 640;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        const base64 = canvas.toDataURL("image/jpeg", 0.8);
+        stopCamera();
+        setPreviewUrl(base64);
+        
+        setLoading(true);
+        try {
+          const data = await runPratibimb(base64);
+          setResult(data);
+        } catch {
+          toast.error("Could not reach backend");
+        } finally {
+          setLoading(false);
+        }
+      }
+    }
+  };
 
   const fileToBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -121,14 +183,23 @@ const Pratibimb = () => {
         className="relative w-full mt-5 rounded-2xl overflow-hidden bg-card border border-border"
         style={{ aspectRatio: "3 / 4" }}
       >
-        {previewUrl ? (
+        {isCameraOpen ? (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ transform: "scaleX(-1)" }}
+          />
+        ) : previewUrl ? (
           <img src={previewUrl} alt="Captured" className="absolute inset-0 w-full h-full object-cover" />
         ) : (
           <div
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-dashed border-primary/60 flex items-center justify-center"
             style={{ width: "60%", height: "75%", borderRadius: "50% / 50%" }}
           >
-            <span className="text-xs font-medium text-foreground/70 tracking-wide">
+            <span className="text-xs font-medium text-foreground/70 tracking-wide text-center px-2">
               Align face here
             </span>
           </div>
@@ -141,20 +212,39 @@ const Pratibimb = () => {
 
       {/* Action buttons */}
       <div className="flex gap-3 mt-4">
-        <button
-          onClick={() => cameraInputRef.current?.click()}
-          disabled={loading}
-          className="flex-1 bg-gradient-primary text-primary-foreground font-semibold py-3 rounded-xl shadow-glow active:scale-[0.98] transition flex items-center justify-center gap-2 disabled:opacity-60"
-        >
-          <Camera size={16} /> Open Camera
-        </button>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={loading}
-          className="flex-1 border border-border text-foreground font-semibold py-3 rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-2 hover:bg-card disabled:opacity-60"
-        >
-          <Upload size={16} /> Upload Photo
-        </button>
+        {isCameraOpen ? (
+          <>
+            <button
+              onClick={capturePhoto}
+              className="flex-1 bg-gradient-primary text-primary-foreground font-semibold py-3 rounded-xl shadow-glow active:scale-[0.98] transition flex items-center justify-center gap-2"
+            >
+              <Camera size={16} /> Capture
+            </button>
+            <button
+              onClick={stopCamera}
+              className="flex-1 bg-destructive/10 text-destructive font-semibold py-3 rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-2"
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={startCamera}
+              disabled={loading}
+              className="flex-1 bg-gradient-primary text-primary-foreground font-semibold py-3 rounded-xl shadow-glow active:scale-[0.98] transition flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              <Camera size={16} /> Open Camera
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+              className="flex-1 border border-border text-foreground font-semibold py-3 rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-2 hover:bg-card disabled:opacity-60"
+            >
+              <Upload size={16} /> Upload Photo
+            </button>
+          </>
+        )}
       </div>
 
       {/* Results */}
