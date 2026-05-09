@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Secrets
+backend/.env
+
+# Database
+backend/sahayak.db
+
+# Generated files
+backend/generated/
+
+# OS files
+.DS_Store
+Thumbs.db

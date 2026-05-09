@@ -1,0 +1,47 @@
+DENGUE:
+Symptoms: sudden high fever, severe headache, pain behind eyes,
+joint pain, muscle pain, skin rash
+Red flags: bleeding gums, blood in vomit, severe stomach pain
+Action: refer to PHC immediately, no aspirin or ibuprofen
+
+TYPHOID:
+Symptoms: fever that rises daily, headache, stomach pain,
+constipation or loose stools, rose spots on chest
+Red flags: confusion, severe stomach pain, intestinal bleeding
+Action: blood test at PHC, antibiotics from doctor only
+
+PNEUMONIA:
+Symptoms: cough with yellow or green phlegm, fever, chest pain,
+fast breathing, difficulty breathing
+Red flags: blue lips, confusion, breathing more than 30 per minute
+Action: emergency referral, especially for children and elderly
+
+HEPATITIS:
+Symptoms: tiredness, yellow skin and eyes, dark urine, nausea,
+upper right stomach pain, no appetite
+Red flags: severe jaundice, confusion, bleeding easily
+Action: refer to PHC, rest and fluids for mild cases
+
+IRON DEFICIENCY ANEMIA:
+Symptoms: tiredness, weakness, pale skin, pale inner eyelid,
+shortness of breath, dizziness, cold hands and feet
+Screening: pull down lower eyelid, pale or white = anemia
+Action: hemoglobin test at PHC, iron tablets, diet advice
+
+SEVERE ACUTE MALNUTRITION:
+Symptoms: visible severe wasting, bones prominent, swollen feet
+and legs, MUAC below 11.5cm in children
+Red flags: any child with SAM = NRC referral immediately
+Action: therapeutic food RUTF, treat infections, close monitoring
+
+HYPERTENSION:
+Symptoms: often no symptoms at all, silent killer
+Screening: BP above 140 over 90 on two readings = hypertension
+Risk factors: excess salt, overweight, stress, family history
+Action: lifestyle change, refer to PHC for medication
+
+DIABETES:
+Symptoms: frequent urination, excessive thirst, weight loss,
+blurred vision, slow healing wounds, tingling in feet
+Screening: random blood sugar above 200 = diabetes flag
+Action: refer to PHC, lifestyle counseling
