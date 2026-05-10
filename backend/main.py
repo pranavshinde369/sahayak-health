@@ -1,10 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 import uvicorn
+import os
+import requests
 
-from gemini import (
+from gemma_client import (
     run_voice_triage,
     run_pratibimb_scan,
     extract_wellness_signals,
@@ -197,6 +199,36 @@ async def nadi_process(data: dict):
 @app.get("/api/nadi/calls")
 def list_nadi_calls():
     return get_nadi_calls()
+
+@app.post("/api/nadi/start-call")
+async def start_nadi_call(request: Request):
+    """Returns signed URL from ElevenLabs to start voice agent."""
+    try:
+        try:
+            body = await request.json()
+        except Exception as e:
+            print("Failed to parse JSON body:", e)
+            body = {}
+            
+        agent_id = os.getenv("ELEVENLABS_AGENT_ID")
+        response = requests.get(
+            f"https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id={agent_id}",
+            headers={"xi-api-key": os.getenv("ELEVENLABS_API_KEY")}
+        )
+        
+        if response.status_code != 200:
+            print(f"ElevenLabs API Error: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=500,
+                detail=f"ElevenLabs connection failed: {response.text}")
+        
+        return {
+            "signed_url": response.json().get("signed_url"),
+            "village": body.get("village", ""),
+            "symptoms": body.get("symptoms", [])
+        }
+    except Exception as e:
+        print(f"General Error in start_nadi_call: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ─── District Dashboard ───────────────────────────────────────────────────────
 
